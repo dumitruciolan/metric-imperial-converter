@@ -7,6 +7,7 @@ module.exports = app => {
   var convertHandler = new ConvertHandler();
 
   app.route("/api/convert").get((req, res) => {
+    let result;
     const { input } = req.query,
       initNum = convertHandler.getNum(input),
       initUnit = convertHandler.getUnit(input),
@@ -19,18 +20,22 @@ module.exports = app => {
         returnUnit
       );
 
-    if (typeof initNum !== "number" && returnUnit === "invalid unit") {
-      return res.status(400).send("invalid number and unit");
-    }
+    // if (initUnit === null && initNum === null)
+    //   return res.status(200).send("invalid number and unit");
+    if (typeof initNum !== "number" && returnUnit === "invalid unit")
+      return res.status(200).send("invalid number and unit");
 
+    //     else if (initNum === null) result = { error: "invalid number" };
     if (typeof initNum !== "number") {
-      return res.status(400).send(initNum);
+      return res.status(200).send(initNum);
     }
 
+    // else if (initUnit === null) result = { error: "invalid unit" };
     if (returnUnit === "invalid unit") {
-      return res.status(400).send(returnUnit);
-    }
-
+      return res.status(200).send(returnUnit);
+    } 
+    
+    // else result = { initNum, initUnit, returnNum, returnUnit, string: toString };
     res.status(200).json({
       initNum,
       initUnit,
@@ -38,18 +43,5 @@ module.exports = app => {
       returnUnit,
       string: toString
     });
-
-    // pre
-    //     let result;
-
-    //     if (initUnit === null && initNum === null)
-    //       result = { erorr: "invalid number and unit" };
-    //     else if (initUnit === null) result = { error: "invalid unit" };
-    //     else if (initNum === null) result = { error: "invalid number" };
-    //     else {
-    //       result = { initNum, initUnit, returnNum, returnUnit, toString };
-    //     }
-
-    //     res.status(200).json(result);
   });
 };
