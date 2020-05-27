@@ -1,40 +1,17 @@
-const validUnits = [
-  "gal",
-  "gallon",
-  "kg",
-  "kilo",
-  "kilogram",
-  "kilogramme",
-  "kilometer",
-  "kilometre",
-  "km",
-  "l",
-  "lb",
-  "liter",
-  "litre",
-  "mi",
-  "mile",
-  "pound"
-];
-
-// prev
-const units = {
-  gal: "L",
-  L: "gal",
-  lbs: "kg",
-  kg: "lbs",
-  km: "mi",
-  mi: "km"
-};
-
 // Meant to be used with exec().
 // First group (the value) is index 1 of the returned array.
 // Second group (the unit) is index 2 of the returned array.
-const valRegex = /(^[\d/.\s]+)?([A-z]+)/g;
+const valRegex = /(^[\d/.\s]+)?([A-z]+)/;
+const regEx = /[(gal)|L|(lbs)|(kg)|(km)|(mi)]$/;
+let result;
 
 function ConvertHandler() {
   this.getNum = input => {
-    let result;
+    const unit = this.getUnit(input);
+
+    if (unit === null) return null;
+
+    const calc = input.split(unit)[0];
 
     if (!input.match(/\d/)) {
       result = "1";
@@ -94,13 +71,6 @@ function ConvertHandler() {
 
     return unitValue;
 
-    //     // prev
-    //     const unit = this.getUnit(input);
-
-    //     if (unit === null) return null;
-
-    //     const calc = input.split(unit)[0];
-
     //     try {
     //       const result = eval(calc === "" ? 1 : calc);
 
@@ -114,204 +84,113 @@ function ConvertHandler() {
     if (!valRegex.test(input)) {
       return "invalid unit";
     }
+    // Get the unit value only, which is at index 2.
+    result = valRegex.exec(input)[2];
+    // result = input.match(regEx)[0];
 
-    // Get only the unit value only
-    let result = valRegex.exec(input)[2];
-    // Reset the index of the regex to prevent issues
+    // Reset the index of the regex to prevent issues.
     valRegex.lastIndex = 0;
 
     switch (result) {
       case "gal":
-        result = "gal";
-        break;
+        return "gal";
       case "GAL":
-        result = "GAL";
-        break;
+        return "GAL";
       case "kg":
-        result = "kg";
-        break;
+        return "kg";
       case "KG":
-        result = "KG";
-        break;
+        return "KG";
       case "km":
-        result = "km";
-        break;
+        return "km";
       case "KM":
-        result = "KM";
-        break;
+        return "KM";
       case "l":
-        result = "l";
-        break;
+        return "l";
       case "L":
-        result = "L";
-        break;
+        return "L";
       case "mi":
-        result = "mi";
-        break;
+        return "mi";
       case "MI":
-        result = "MI";
-        break;
+        return "MI";
       case "lbs":
-        result = "lbs";
-        break;
+        return "lbs";
       case "LBS":
-        result = "LBS";
-        break;
+        return "LBS";
       default:
-        result = "invalid unit";
-        break;
+        return "invalid unit";
     }
-
-    return result;
-
-    //     // prev
-    //     const regEx = /[(gal)|L|(lbs)|(kg)|(km)|(mi)]$/;
-    //     const result = input.match(regEx);
-    //     return result === null ? null : result[0];
+    // return result === null ? null : result[0];
   };
 
   this.getReturnUnit = initUnit => {
-    let result;
+    if (initUnit === null) return null;
 
-    switch (initUnit) {
+    switch (initUnit.toLowerCase()) {
       case "gal":
-      case "GAL":
-        result = "l";
-        break;
+        return "l";
       case "kg":
-      case "KG":
-        result = "lbs";
-        break;
+        return "lbs";
       case "km":
-      case "KM":
-        result = "mi";
-        break;
+        return "mi";
       case "l":
-      case "L":
-        result = "gal";
-        break;
+        return "gal";
       case "mi":
-      case "MI":
-        result = "km";
-        break;
+        return "km";
       case "lbs":
-      case "LBS":
-        result = "kg";
-        break;
+        return "kg";
       default:
-        result = "invalid unit";
-        break;
+        return "invalid unit";
     }
-
-    return result;
-    //     // prev
-    //     // rewrite as ternary operator?
-    //     if (initUnit === null) return null;
-
-    //     return units[initUnit];
   };
 
   this.spellOutUnit = unit => {
-    let result;
-
     switch (unit) {
       case "gal":
-        result = "gallons";
-        break;
+        return "gallons";
       case "kg":
-        result = "kilogrammes";
-        break;
+        return "kilogrammes";
       case "km":
-        result = "kilometres";
-        break;
+        return "kilometres";
       case "l":
-        result = "litres";
-        break;
+        return "liters";
       case "mi":
-        result = "miles";
-        break;
+        return "miles";
       case "lbs":
-        result = "pounds";
-        break;
+        return "pounds";
       default:
-        break;
+        return;
     }
-
-    return result;
   };
 
   this.convert = (initNum, initUnit) => {
-    const galToL = 3.78541,
-      lbsToKg = 0.453592,
-      miToKm = 1.60934,
-      LToGal = 1 / galToL,
-      kgToLbs = 1 / lbsToKg,
-      kmToMi = 1 / miToKm;
-    let result;
+    const galToL = 3.78541;
+    const lbsToKg = 0.453592;
+    const miToKm = 1.60934;
 
-    // prev
-    //     if (initNum === null) return null;
-
-    const handleNumber = num => {
-      let tooManyFractions = false;
-      let fractions = [];
-      const integers = [];
-
-      num.split(" ").forEach(value => {
-        if (value.includes("/")) {
-          fractions = fractions.concat(value.split("/"));
-
-          // more than one fraction
-          if (fractions.length > 2) {
-            tooManyFractions = true;
-          }
-        } else {
-          integers.push(value);
-        }
-      });
-
-      if (tooManyFractions) {
-        return "invalid number";
-      }
-
-      const decimal = fractions.reduce((p, c) => parseFloat(p) / parseFloat(c));
-      const integer = integers.reduce(
-        (p, c) => parseInt(p, 10) / parseInt(c, 10)
-      );
-
-      return parseInt(integer, 10) + parseFloat(decimal);
-    };
-
-    const unitValue = handleNumber(initNum);
+    if (initNum === null) return null;
 
     if (initNum !== "invalid number") {
-      switch (initNum) {
+      switch (initUnit.toLowerCase()) {
         case "gal":
-        case "GAL":
           result = initNum * galToL;
           break;
         case "kg":
-        case "KG":
           result = initNum / lbsToKg;
           break;
         case "km":
-        case "KM":
           result = initNum / miToKm;
           break;
         case "l":
-        case "L":
           result = initNum / galToL;
           break;
         case "mi":
-        case "MI":
           result = initNum * miToKm;
           break;
         case "lbs":
-        case "LBS":
           result = initNum * lbsToKg;
           break;
         default:
-          // result = null;
+          result = null;
           break;
       }
 
@@ -321,51 +200,19 @@ function ConvertHandler() {
     }
 
     return result;
-
-    // prev
-    //             if (initNum === null) {
-    //             return null;
-    //         }
-
-    //         switch (initUnit) {
-    //             case 'gal': {
-    //                 return initNum * galToL;
-    //             }
-    //             case 'L': {
-    //                 return initNum * LToGal;
-    //             }
-    //             case 'lbs': {
-    //                 return initNum * lbsToKg;
-    //             }
-    //             case 'kg': {
-    //                 return initNum * kgToLbs;
-    //             }
-    //             case 'mi': {
-    //                 return initNum * miToKm;
-    //             }
-    //             case 'km': {
-    //                 return initNum * kmToMi;
-    //             }
-    //             default: {
-    //                 return null;
-    //             }
   };
 
   this.getString = (initNum, initUnit, returnNum, returnUnit) => {
-    // TODO: Handle plural cases aka num > 1 = miles/kilogrammes etc.
-    const result = `${initNum} ${initUnit} converts to ${returnNum} ${returnUnit}`;
+    initNum === null ||
+    initUnit === null ||
+    returnNum === null ||
+    returnUnit === null
+      ? null
+      : result;
 
-    return result;
-    //     // prev. rewrite as ternary operator?
-    //     if (
-    //       initNum === null ||
-    //       initUnit === null ||
-    //       returnNum === null ||
-    //       returnUnit === null
-    //     )
-    //       return null;
-
-    //     return result;
+    return `${initNum} ${this.spellOutUnit(
+      initUnit
+    )} converts to ${returnNum} ${this.spellOutUnit(returnUnit)}`;
   };
 }
 

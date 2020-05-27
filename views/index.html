@@ -88,7 +88,7 @@
           placeholder="3.1mi"
           style="width: 200px"
         />
-        <button id="convert" type="button">Convert!</button>
+        <input id="convert" type="submit" value="Convert!" />
       </form>
       <p id="result"></p>
       <code id="jsonResult"></code>
@@ -102,7 +102,8 @@
     ></script>
     <script>
       $(function() {
-        $("#convert").click(function() {
+        $("#convertForm").click(function() {
+          event.preventDefault();
           $.ajax({
             url: "/api/convert",
             type: "get",
