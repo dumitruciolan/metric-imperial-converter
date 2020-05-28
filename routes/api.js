@@ -1,11 +1,11 @@
 "use strict";
 
 const { expect } = require("chai"),
-  ConvertHandler = require("../controllers/convertHandler.js");
+  ConvertHandler = require("../controllers/convertHandler.js"),
+  convertHandler = new ConvertHandler();
 
+// user story 3
 module.exports = app => {
-  var convertHandler = new ConvertHandler();
-
   app.route("/api/convert").get((req, res) => {
     let result;
     const { input } = req.query,
@@ -20,28 +20,21 @@ module.exports = app => {
         returnUnit
       );
 
-    // if (initUnit === null && initNum === null)
-    //   return res.status(200).send("invalid number and unit");
+    // handling invalid numbers and units (user story 10)
     if (typeof initNum !== "number" && returnUnit === "invalid unit")
       return res.status(200).send("invalid number and unit");
-
-    //     else if (initNum === null) result = { error: "invalid number" };
-    if (typeof initNum !== "number") {
-      return res.status(200).send(initNum);
-    }
-
-    // else if (initUnit === null) result = { error: "invalid unit" };
-    if (returnUnit === "invalid unit") {
+    // handling invalid numbers (user story 9)
+    else if (typeof initNum !== "number") return res.status(200).send(initNum);
+    // handling invalid units (user story 8)
+    else if (initUnit === null || returnUnit === "invalid unit")
       return res.status(200).send(returnUnit);
-    } 
-    
-    // else result = { initNum, initUnit, returnNum, returnUnit, string: toString };
-    res.status(200).json({
-      initNum,
-      initUnit,
-      returnNum,
-      returnUnit,
-      string: toString
-    });
+    else
+      res.status(200).json({
+        initNum,
+        initUnit,
+        returnNum,
+        returnUnit,
+        string: toString
+      });
   });
 };

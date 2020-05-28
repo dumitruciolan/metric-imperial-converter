@@ -4,7 +4,7 @@
 const chai = require("chai"),
   ConvertHandler = require("../controllers/convertHandler.js"),
   convertHandler = new ConvertHandler(),
-  assert = chai.assert;
+  { assert } = chai;
 
 suite("Unit Tests", () => {
   suite("Function convertHandler.getNum(input)", () => {

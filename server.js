@@ -20,17 +20,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const helmet = require("helmet");
 app.use(helmet());
 
-//Index page (static HTML)
+// Index page (static HTML)
 app
   .route("/")
   .get((_, res) => res.sendFile(process.cwd() + "/views/index.html"));
 
-//For FCC testing purposes
+// For FCC testing purposes
 fccTestingRoutes(app);
 //Routing for API
 apiRoutes(app);
 
-//404 Not Found Middleware
+// 404 Not Found Middleware
 app.use((_, res) =>
   res
     .status(404)
@@ -38,7 +38,7 @@ app.use((_, res) =>
     .send("Not Found")
 );
 
-//Start our server and tests!
+// Start our server and tests!
 app.listen(process.env.PORT || 3000, () => {
   console.log("Listening on port " + process.env.PORT);
   if (process.env.NODE_ENV === "test") {
@@ -53,4 +53,4 @@ app.listen(process.env.PORT || 3000, () => {
   }
 });
 
-module.exports = app; //for testing
+module.exports = app; // for testing

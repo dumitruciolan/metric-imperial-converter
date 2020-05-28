@@ -1,8 +1,4 @@
-// Meant to be used with exec().
-// First group (the value) is index 1 of the returned array.
-// Second group (the unit) is index 2 of the returned array.
-const valRegex = /(^[\d/.\s]+)?([A-z]+)/;
-const regEx = /[(gal)|L|(lbs)|(kg)|(km)|(mi)]$/;
+const regEx = /(^[\d/.\s]+)?([A-z]+)/;
 let result;
 
 function ConvertHandler() {
@@ -11,85 +7,55 @@ function ConvertHandler() {
 
     if (unit === null) return null;
 
-    const calc = input.split(unit)[0];
-
-    if (!input.match(/\d/)) {
-      result = "1";
-    } else {
-      result = valRegex.exec(input)[1] || "invalid number";
-      result = result.trim();
-      // Reset the index of the regex to prevent issues.
-      valRegex.lastIndex = 0;
-    }
+    !input.match(/\d/)
+      ? // user story 11
+        (result = "1")
+      : // user story 9. index 1 = the value
+        (result = input.match(regEx)[1] || "invalid number");
 
     const handleNumber = num => {
-      if (num === "invalid number") {
-        return num;
-      }
-      let tooManyFractions = false;
-      let fractions = [];
+      if (num === "invalid number") return num;
+
+      let fractions = [],
+        multipleFractions = false;
       const integers = [];
-      // Split the expression by any spaces.
+      // split the expression
       num.split(" ").forEach(value => {
-        // If the value contains a forward slash, treat it as a fraction.
+        // treat it as a fraction
         if (value.includes("/")) {
-          // Merge the split() returned array into the fractions array.
+          // merge the array into the fractions array
           fractions = fractions.concat(value.split("/"));
 
-          // If there is more than one fraction, return invalid number.
-          if (fractions.length > 2) {
-            tooManyFractions = true;
-          }
-        } else {
-          // Else treat it as a whole integer and add it to the integer array.
-          integers.push(value);
-        }
+          if (fractions.length > 2) multipleFractions = true;
+        } // treat it as a whole and add it to the integer array
+        else integers.push(value);
       });
 
-      if (tooManyFractions) {
-        return "invalid number";
-      }
+      // more than one fraction = invalid number
+      if (multipleFractions) return "invalid number";
 
-      let decimal = 0.0;
-      let integer = 0;
+      let decimal = 0.0,
+        integer = 0;
 
-      // Handle the fraction division.
-      if (fractions && fractions.length > 0) {
+      // handle fraction division
+      if (fractions && fractions.length > 0)
         decimal = fractions.reduce((p, c) => parseFloat(p) / parseFloat(c));
-      }
 
-      // Handle the integer addition.
-      if (integers && integers.length > 0) {
+      // handle integer addition
+      if (integers && integers.length > 0)
         integer = integers.reduce((p, c) => parseFloat(p) + parseFloat(c));
-      }
 
-      // Add it all together to get the final value.
+      // add them together to get the final value
       return parseFloat(integer) + parseFloat(decimal);
     };
-
-    const unitValue = handleNumber(result);
-
-    return unitValue;
-
-    //     try {
-    //       const result = eval(calc === "" ? 1 : calc);
-
-    //       return result;
-    //     } catch (e) {
-    //       return null;
-    //     }
+    return handleNumber(result);
   };
 
   this.getUnit = input => {
-    if (!valRegex.test(input)) {
-      return "invalid unit";
-    }
-    // Get the unit value only, which is at index 2.
-    result = valRegex.exec(input)[2];
-    // result = input.match(regEx)[0];
+    if (!regEx.test(input)) return "invalid unit";
 
-    // Reset the index of the regex to prevent issues.
-    valRegex.lastIndex = 0;
+    // retrieve only the unit
+    result = input.match(regEx)[2];
 
     switch (result) {
       case "gal":
@@ -117,9 +83,8 @@ function ConvertHandler() {
       case "LBS":
         return "LBS";
       default:
-        return "invalid unit";
+        return result === null ? null : "invalid unit";
     }
-    // return result === null ? null : result[0];
   };
 
   this.getReturnUnit = initUnit => {
@@ -143,8 +108,9 @@ function ConvertHandler() {
     }
   };
 
+  // used for user story 12
   this.spellOutUnit = unit => {
-    switch (unit) {
+    switch (unit.toLowerCase()) {
       case "gal":
         return "gallons";
       case "kg":
@@ -158,10 +124,11 @@ function ConvertHandler() {
       case "lbs":
         return "pounds";
       default:
-        return;
+        return null;
     }
   };
 
+  // user stories 5, 6 and 7
   this.convert = (initNum, initUnit) => {
     const galToL = 3.78541;
     const lbsToKg = 0.453592;
@@ -193,22 +160,21 @@ function ConvertHandler() {
           result = null;
           break;
       }
-
-      if (typeof result === "number") {
-        result = Number(result.toFixed(5));
-      }
+      // round the result to 5 decimals
+      if (typeof result === "number") result = parseFloat(result.toFixed(5));
     }
-
     return result;
   };
 
+  // user story 12
   this.getString = (initNum, initUnit, returnNum, returnUnit) => {
-    initNum === null ||
-    initUnit === null ||
-    returnNum === null ||
-    returnUnit === null
-      ? null
-      : result;
+    if (
+      initNum === null ||
+      initUnit === null ||
+      returnNum === null ||
+      returnUnit === null
+    )
+      return null;
 
     return `${initNum} ${this.spellOutUnit(
       initUnit
